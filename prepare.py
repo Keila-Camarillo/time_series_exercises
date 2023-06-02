@@ -1,6 +1,7 @@
 import pandas as pd
+import acquire as a
 
-def process_dataframe(df):
+def process_superstore(df):
     """
     Process the given DataFrame by performing the following operations:
     1. Remove GMT from the 'sale_date' column.
@@ -82,3 +83,15 @@ def fill_nulls_using_resample(df, frequency):
     df_filled = df_resampled.fillna(method='ffill')  # Forward fill
     
     return df_filled
+
+def preprocess_opsd_data():
+    df = a.acquire_opsd_data()
+    df.columns = df.columns.str.lower()
+    df.date = df.date.astype('datetime64')
+    df = df.set_index('date')
+    df = df.sort_index()
+    df['month'] = df.index.strftime('%B')
+    df['year'] = df.index.strftime('%Y')
+    df = drop_rows_by_index_range(df, '2006-01-01', '2011-12-31')
+    df = fill_nulls_using_resample(df, 'D')
+    return df
